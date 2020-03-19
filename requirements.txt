@@ -1,0 +1,17 @@
+alpha-vantage
+beautifulsoup4
+fxcmpy
+matplotlib
+nltk
+numpy
+pandas
+pandas-datareader
+requests
+requests-file
+requests-ftp
+scikit-learn
+scipy
+stocktrends
+urllib3
+wrapt
+yahoofinancials
