@@ -5,12 +5,10 @@ sys.path.append(os.path.abspath(os.path.join('.')))
 import paper_pants.data_collection.scraper.statement_scraper as ws
 
 name = 'yahoo'
-type = 'BS'
-url = 'https://finance.yahoo.com/quote/'
-companies = ['AAPL', 'MSFT']
+pages = ['Balance Sheet', 'Income Statement', 'Cash Flow', 'Key Ratios']
+companies = ['AAPL', 'MSFT', 'IBM', 'HLT']
 
-for company in companies:
-    bs_url = url + company
-    yh_ws = ws.StatementScraper(name, type, 'https://finance.yahoo.com/quote/MSFT/balance-sheet?p=MSFT', companies)
-    print(yh_ws)
-    print(yh_ws.scrape_yahoo_balance())
+yh_ws = ws.StatementScraper(name, pages, companies)
+print(yh_ws)
+yh_ws.scrape_yahoo()
+
