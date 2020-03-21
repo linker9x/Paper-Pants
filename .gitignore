@@ -132,3 +132,6 @@ dmypy.json
 .idea/
 
 *.csv
+# vcode
+.vscode/
+api.key
