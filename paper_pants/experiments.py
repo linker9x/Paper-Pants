@@ -20,7 +20,8 @@ companies = ['AAPL', 'MSFT']
 
 
 if __name__ == "__main__":
-    sA = sa.StockApi(companies)
+    sA = sa.StockApi(companies, alpha_key_path='/app/api.key')
     print(sA)
     print(sA.get_data_pd_yahoo(startDate, endDate ))
     print(sA.get_data_yahoofinancials(startDate,endDate))
+    print(sA.get_data_alpha_vantage(startDate, endDate))

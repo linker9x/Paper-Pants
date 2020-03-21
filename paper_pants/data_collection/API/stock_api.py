@@ -29,11 +29,14 @@ class StockApi(object):
         self.__placeholderLength = max(len(company) for company in companies) + 10
         self._attempts = 5
         if not alpha_key_path is None:
+            print('Try to load alpha api key...')
             try:
-                self._alpha_key = open(self.__alpha_key_path, 'r').read()
+                self._alpha_key = open(alpha_key_path, 'r').read()
                 self.__alpha_key_loaded = True
+                print('Alpha key successful loaded')
             except:
                 self.__alpha_key_loaded = False
+                print('Alpha key failed to load')
         else:
             self.__alpha_key_loaded = False
         
@@ -133,8 +136,7 @@ class StockApi(object):
     def get_data_alpha_vantage(self, startDate:datetime, endDate:datetime, interval:str = '1min')->pd.DataFrame:
         '''
             Get the data for the companies with the alpha vantage function
-            So Historical data.
-            TODO: TEST
+            So Historical data. 
             
             Parameters
             ----------
