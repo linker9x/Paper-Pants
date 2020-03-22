@@ -59,7 +59,7 @@ class StatementScraper(object):
         :return:
         """
         if self.financials:
-            filepath = '../statements_stats_data/'
+            filepath = '../data/statements_stats'
             if not os.path.exists(filepath):
                 os.mkdir(filepath)
 
