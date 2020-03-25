@@ -105,12 +105,11 @@ class StockApi(object):
             tickers = [company for company in self._companies if company not in drop]
             attempt += 1
         print('fetching data finished!')
-        return stock_data
+        return stock_data.fillna(method='bfill', axis=0)
 
     def get_data_yahoofinancials(self, startDate:datetime, endDate:datetime, interval:str = 'daily')->pd.DataFrame:
         """
             Get the data for the companies with the yahoofinancials function
-            So Historical data.
             
             Parameters
             ----------
@@ -152,12 +151,11 @@ class StockApi(object):
             tickers = [company for company in self._companies if company not in drop]
             attempt += 1
         print('fetching data finished!')
-        return stock_data
+        return stock_data.fillna(method='bfill', axis=0)
 
     def get_data_alpha_vantage(self, startDate:datetime, endDate:datetime, interval:str = '1min')->pd.DataFrame:
         """
             Get the data for the companies with the alpha vantage function
-            So Historical data. 
             
             Parameters
             ----------
@@ -209,6 +207,6 @@ class StockApi(object):
             tickers = [company for company in self._companies if company not in drop]
             attempt += 1
         print('fetching data finished!')
-        return stock_data
+        return stock_data.fillna(method='bfill', axis=0)
 
    
