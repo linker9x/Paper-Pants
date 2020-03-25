@@ -8,12 +8,25 @@ import datetime
 
 
 class StockApi(object):
-    '''
-        Get Data From different stock apis
-    '''
+    """
+        Get stock data from different stock apis
+        
+        Attributes
+        ----------
+        -
+
+        Methods
+        -------
+        get_data_pd_yahoo(startDate, endDate, interval='d')
+            Get stock data from yahoo finance api with pandareader
+        get_data_zahoofinancials(startDate, endDate, interval='daily')
+            Get stock data from yahoo finance api with yahoofinancials
+        get_data_alpha_vantage(startDate, endDate, interval='1min')
+            Get stock data from alpha vantage
+    """
 
     def __init__(self, companies: List[str], attempts:int = 5, alpha_key_path:str = None):
-        '''
+        """
             Init the needed variables
 
             Parameters
@@ -24,7 +37,7 @@ class StockApi(object):
                 how often a fetch task should be retried if it fails 
             alpha_key_path: str, default None
                 Path to the api key for alpha vantage
-        '''
+        """
         self._companies = companies
         self.__placeholderLength = max(len(company) for company in companies) + 10
         self._attempts = 5
@@ -51,9 +64,8 @@ class StockApi(object):
         return 'StockApi(' + repr(self._companies) + ', ' + self._attempts + ')'
 
     def get_data_pd_yahoo(self, startDate:datetime, endDate:datetime, interval:str = 'd')->pd.DataFrame:
-        '''
-            Get the data for the companies with the pandareader yahoo function
-            So Historical data.
+        """
+            Get the data for the companies with the pandareader yahoo function 
             
             Parameters
             ----------
@@ -64,8 +76,13 @@ class StockApi(object):
             interval: string, default 'd'
                 Valid values are '1d', '5d', '1mo', '3mo', '6mo', '1y', '2y', '5y',
                     '10y', 'ytd', 'max'
+            
+            Returns
+            -------
+            pandas.Dataframe()
 
-        '''
+
+        """
         stock_data = pd.DataFrame() # dataframe to store close price of each ticker
         attempt = 0 # attempts to fetch the data
         drop = [] 
@@ -91,7 +108,7 @@ class StockApi(object):
         return stock_data
 
     def get_data_yahoofinancials(self, startDate:datetime, endDate:datetime, interval:str = 'daily')->pd.DataFrame:
-        '''
+        """
             Get the data for the companies with the yahoofinancials function
             So Historical data.
             
@@ -104,7 +121,11 @@ class StockApi(object):
             interval: string, default 'daily'
                 Valid values are 'daily', 'weekly', 'monthly'
 
-        '''
+            Returns
+            -------
+            pandas.Dataframe()
+
+        """
         stock_data = pd.DataFrame() # dataframe to store close price of each ticker
         attempt = 0 # attempts to fetch the data
         drop = [] 
@@ -134,7 +155,7 @@ class StockApi(object):
         return stock_data
 
     def get_data_alpha_vantage(self, startDate:datetime, endDate:datetime, interval:str = '1min')->pd.DataFrame:
-        '''
+        """
             Get the data for the companies with the alpha vantage function
             So Historical data. 
             
@@ -147,7 +168,11 @@ class StockApi(object):
             interval: string, default '1min'
                 Valid values are '1min', '5min', '15min', '30min', '60min', 'daily', 'weekly', 'monthly'
 
-        '''
+            Returns
+            -------
+            pandas.Dataframe()
+
+        """
         if not self.__alpha_key_loaded:
             print('No Alpha Vantage Api Key loaded')
             return pd.DataFrame()

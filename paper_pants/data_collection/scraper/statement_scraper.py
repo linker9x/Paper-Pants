@@ -31,7 +31,7 @@ class StatementScraper(object):
     Methods
     -------
     says(sound=None)
-        Prints the animals name and what sound it makes
+        Prints the animals name and what sound it makes | NOTE: Wait..., what? I will add this method if this comment stays here `=D
     """
 
     def __init__(self, pages, companies):
