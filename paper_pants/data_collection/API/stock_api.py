@@ -1,5 +1,5 @@
 from typing import List
-import pandas as pd 
+import pandas as pd  
 import pandas_datareader.data as pdr 
 from alpha_vantage.timeseries import TimeSeries
 
@@ -83,22 +83,27 @@ class StockApi(object):
 
 
         """
-        stock_data = pd.DataFrame() # dataframe to store close price of each ticker
+        stock_data = None # dataframe to store close price of each ticker
         attempt = 0 # attempts to fetch the data
         drop = [] 
         tickers = [company for company in self._companies if company not in drop]
+        print('PDsReaders Yahoo')
         print('Try to get data for the companies ({} - {})'.format(startDate, endDate))
         while len(tickers) != 0 and attempt <= self._attempts:
             if attempt > 0:
-                print('Retry {} companies that failed...'.format(len(drop)))
+                print('Retry {} companies that failed...'.format(len(tickers)))
             print('-----------------')
             print('Attempt: {}'.format(attempt + 1))
             print('-----------------')
             for i in range(len(tickers)):
                 try:
-                    tmpStockData = pdr.get_data_yahoo(tickers[i], startDate, endDate, interval=interval)
-                    tmpStockData.dropna(inplace = True)
-                    stock_data[tickers[i]] = tmpStockData['Adj Close']
+                    tmpStockData = pdr.get_data_yahoo(tickers[i], startDate, endDate, interval=interval) 
+                    tmpStockData.columns = ['Date', 'Open', 'Low', 'High','Close', 'Volume']
+                    tmpStockData = pd.concat([tmpStockData], keys=[tickers[i]], axis=1)
+                    if stock_data is not None:
+                        stock_data = stock_data.join(tmpStockData)
+                    else:
+                        stock_data = tmpStockData 
                     drop.append(tickers[i])
                 except:
                     print('\t{}: failed to fetch data'.format(tickers[i]))
@@ -125,14 +130,15 @@ class StockApi(object):
             pandas.Dataframe()
 
         """
-        stock_data = pd.DataFrame() # dataframe to store close price of each ticker
+        stock_data = None # dataframe to store close price of each ticker
         attempt = 0 # attempts to fetch the data
         drop = [] 
         tickers = [company for company in self._companies if company not in drop]
+        print('YahooFinancials')
         print('Try to get data for the companies ({} - {})'.format(startDate, endDate))
         while len(tickers) != 0 and attempt <= self._attempts:
             if attempt > 0:
-                print('Retry {} companies that failed...'.format(len(drop)))
+                print('Retry {} companies that failed...'.format(len(tickers)))
             print('-----------------') 
             print('Attempt: {}'.format(attempt + 1))
             print('-----------------')
@@ -141,15 +147,21 @@ class StockApi(object):
                     yahoo_financials = YahooFinancials(tickers[i])
                     json_response = yahoo_financials.get_historical_price_data(startDate.strftime('%Y-%m-%d'), endDate.strftime('%Y-%m-%d'), interval)
                     ohlv = json_response[tickers[i]]['prices']
-                    tmpStockData = pd.DataFrame(ohlv)[['formatted_date', 'adjclose']]
-                    tmpStockData.set_index('formatted_date', inplace=True)
+                    tmpStockData = pd.DataFrame(ohlv)[['formatted_date','open', 'low', 'high', 'adjclose', 'volume']]
+                    tmpStockData.columns = ['Date', 'Open', 'Low', 'High','Close', 'Volume']
+                    tmpStockData.set_index('Date', inplace=True)                    
                     tmpStockData2 = tmpStockData[~tmpStockData.index.duplicated(keep='first')]
-                    stock_data[tickers[i]] = tmpStockData2['adjclose']
+                    tmpStockData2 = pd.concat([tmpStockData2], keys=[tickers[i]], axis=1)
+                    if stock_data is not None:
+                        stock_data = stock_data.join(tmpStockData2)
+                    else:
+                        stock_data = tmpStockData2 
                     drop.append(tickers[i])
                 except:
                     print('\t{}: failed to fetch data'.format(tickers[i]))
             tickers = [company for company in self._companies if company not in drop]
             attempt += 1
+
         print('fetching data finished!')
         return stock_data.fillna(method='bfill', axis=0)
 
@@ -174,14 +186,15 @@ class StockApi(object):
         if not self.__alpha_key_loaded:
             print('No Alpha Vantage Api Key loaded')
             return pd.DataFrame()
-        stock_data = pd.DataFrame() # dataframe to store close price of each ticker
+        stock_data = None # dataframe to store close price of each ticker
         attempt = 0 # attempts to fetch the data
         drop = [] 
         tickers = [company for company in self._companies if company not in drop]
+        print('Alpha Vantage')
         print('Try to get data for the companies ({} - {})'.format(startDate, endDate))
         while len(tickers) != 0 and attempt <= self._attempts:
             if attempt > 0:
-                print('Retry {} companies that failed...'.format(len(drop)))
+                print('Retry {} companies that failed...'.format(len(tickers)))
             print('-----------------') 
             print('Attempt: {}'.format(attempt + 1))
             print('-----------------')
@@ -198,15 +211,21 @@ class StockApi(object):
                         tmpStockData = ts.get_monthly(symbol=tickers[i])[0]
                     else:
                         print('wrong interval')
-                        return pd.DataFrame()
-                    tmpStockData.columns = ['open', 'high', 'low', 'close', 'volume']                  
-                    stock_data[tickers[i]] = tmpStockData['close']
+                        return pd.DataFrame()                     
+                    tmpStockData.columns = [ 'Open', 'Low', 'High','Close', 'Volume']     
+                    tmpStockData.index.names = ['Date']           
+                    tmpStockData = pd.concat([tmpStockData], keys=[tickers[i]], axis=1)
+                    if stock_data is not None:
+                        stock_data = stock_data.join(tmpStockData)
+                    else:
+                        stock_data = tmpStockData 
+                    drop.append(tickers[i])
                     drop.append(tickers[i])
                 except:
                     print('\t{}: failed to fetch data'.format(tickers[i]))
             tickers = [company for company in self._companies if company not in drop]
             attempt += 1
         print('fetching data finished!')
-        return stock_data.fillna(method='bfill', axis=0)
+        return stock_data.fillna(method='bfill', axis=0).sort_index()
 
    
