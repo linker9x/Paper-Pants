@@ -86,56 +86,70 @@ def rsi(dataframe, n):
 
 
 def adx(dataframe, n):
-    "function to calculate ADX"
-    df2 = dataframe.copy()
-    df2['TR'] = atr(df2,n)['TR'] #the period parameter of ATR function does not matter because period does not influence TR calculation
-    df2['DMplus']=np.where((df2['High']-df2['High'].shift(1))>(df2['Low'].shift(1)-df2['Low']),df2['High']-df2['High'].shift(1),0)
-    df2['DMplus']=np.where(df2['DMplus']<0,0,df2['DMplus'])
-    df2['DMminus']=np.where((df2['Low'].shift(1)-df2['Low'])>(df2['High']-df2['High'].shift(1)),df2['Low'].shift(1)-df2['Low'],0)
-    df2['DMminus']=np.where(df2['DMminus']<0,0,df2['DMminus'])
-    TRn = []
-    DMplusN = []
-    DMminusN = []
-    TR = df2['TR'].tolist()
-    DMplus = df2['DMplus'].tolist()
-    DMminus = df2['DMminus'].tolist()
-    for i in range(len(df2)):
-        if i < n:
-            TRn.append(np.NaN)
-            DMplusN.append(np.NaN)
-            DMminusN.append(np.NaN)
-        elif i == n:
-            TRn.append(df2['TR'].rolling(n).sum().tolist()[n])
-            DMplusN.append(df2['DMplus'].rolling(n).sum().tolist()[n])
-            DMminusN.append(df2['DMminus'].rolling(n).sum().tolist()[n])
-        elif i > n:
-            TRn.append(TRn[i-1] - (TRn[i-1]/n) + TR[i])
-            DMplusN.append(DMplusN[i-1] - (DMplusN[i-1]/n) + DMplus[i])
-            DMminusN.append(DMminusN[i-1] - (DMminusN[i-1]/n) + DMminus[i])
-    df2['TRn'] = np.array(TRn)
-    df2['DMplusN'] = np.array(DMplusN)
-    df2['DMminusN'] = np.array(DMminusN)
-    df2['DIplusN']=100*(df2['DMplusN']/df2['TRn'])
-    df2['DIminusN']=100*(df2['DMminusN']/df2['TRn'])
-    df2['DIdiff']=abs(df2['DIplusN']-df2['DIminusN'])
-    df2['DIsum']=df2['DIplusN']+df2['DIminusN']
-    df2['DX']=100*(df2['DIdiff']/df2['DIsum'])
-    ADX = []
-    DX = df2['DX'].tolist()
-    for j in range(len(df2)):
-        if j < 2*n-1:
-            ADX.append(np.NaN)
-        elif j == 2*n-1:
-            ADX.append(df2['DX'][j-n+1:j+1].mean())
-        elif j > 2*n-1:
-            ADX.append(((n-1)*ADX[j-1] + DX[j])/n)
-    df2['ADX']=np.array(ADX)
+    df = dataframe.copy()
 
-    stock = sdf.retype(col_rename(dataframe.copy()))
-    df2["ADX_2"] = stock.get('adx')
+    df['TR'] = atr(df, n)['TR'] #the period doesn't influence the TR col
 
-    df2.dropna(inplace=True)
-    return df2[['ADX', 'ADX_2']]
+    # if cur high - prev high > prev low - cur low --> plus directional movement = cur high - prev high
+    df['DMplus'] = np.where((df['High'] - df['High'].shift(1)) > (df['Low'].shift(1) - df['Low']),
+                           df['High'] - df['High'].shift(1), 0)
+    # if cur high - prev high < 0 --> 0
+    df['DMplus'] = np.where(df['DMplus'] < 0,
+                             0, df['DMplus'])
+
+    # if prev low - cur low > cur high - prev high --> neg directional movement = prev low - cur low
+    df['DMminus'] = np.where((df['Low'].shift(1)-df['Low'])>(df['High']-df['High'].shift(1)),
+                              df['Low'].shift(1)-df['Low'], 0)
+    # if prev low - cur low < 0 --> 0
+    df['DMminus'] = np.where(df['DMminus'] < 0,
+                              0, df['DMminus'])
+
+    # smooth the sums of these three cols for a period of n
+    df['TR_wws'] = wws(df['TR'], n)
+    df['DMplus_wws'] = wws(df['DMplus'], n)
+    df['DMminus_wws'] = wws(df['DMminus'], n)
+
+    # calculate the +/- directional indicators
+    df['DIplus'] = 100 * (df['DMplus_wws'] / df['TR_wws'])
+    df['DIminus'] = 100 * (df['DMminus_wws'] / df['TR_wws'])
+
+    # calculate the difference and sum of +/- directional indicators
+    df['DIdiff'] = abs(df['DIplus'] - df['DIminus'])
+    df['DIsum'] = df['DIplus'] + df['DIminus']
+
+    # calculate directional movement index
+    df['DX'] = 100 * (df['DIdiff'] / df['DIsum'])
+
+    # find the smoothed average for a period of n
+    df.dropna(inplace=True)
+    df['ADX'] = wwma(df['DX'], n)
+
+    df.dropna(inplace=True)
+    return df['ADX']
+
+def wws(column, period):
+    wws_list = []
+
+    for i in range(len(column)):
+        if i < period:
+            wws_list.append(np.NaN)
+        elif i == period:
+            wws_list.append(column.rolling(period).sum().tolist()[period])
+        elif i > period:
+            wws_list.append(wws_list[i-1] - (wws_list[i-1] / period) + column[i])
+
+    return np.array(wws_list)
+
+def wwma(column, period):
+    return pd.Series(
+        data=[column.iloc[:period].mean()],
+        index=[column.index[period - 1]],
+    ).append(
+        column.iloc[period:]
+    ).ewm(
+        alpha=1.0/period,
+        adjust=False,
+    ).mean()
 
 
 def obv(dataframe):
@@ -148,11 +162,11 @@ def obv(dataframe):
     return df
 
 
-def slope(ser,n):
+def slope(column, n):
     "function to calculate the slope of n consecutive points on a plot"
     slopes = [i*0 for i in range(n-1)]
-    for i in range(n,len(ser)+1):
-        y = ser[i-n:i]
+    for i in range(n, len(column)+1):
+        y = column[i-n:i]
         x = np.array(range(n))
         y_scaled = (y - y.min())/(y.max() - y.min())
         x_scaled = (x - x.min())/(x.max() - x.min())
