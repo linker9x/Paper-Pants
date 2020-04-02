@@ -35,8 +35,8 @@ if __name__ == "__main__":
     # print(ti.atr(ohlcv, 20))
     # print(ti.bollinger_band(ohlcv, 20))
     # print(ti.rsi(ohlcv, 14))
-    print(ti.adx(ohlcv, 14))
+    # print(ti.adx(ohlcv, 14))
     # print(ti.obv(ohlcv))
-    # print(ti.slope(ohlcv['Adj Close'], 5))
+    print(ti.slope(ohlcv, 5))
     # print(ti.renko(ohlcv))
 
