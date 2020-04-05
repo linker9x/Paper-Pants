@@ -15,3 +15,5 @@ stocktrends
 urllib3
 wrapt
 yahoofinancials
+stockstats
+statsmodels
