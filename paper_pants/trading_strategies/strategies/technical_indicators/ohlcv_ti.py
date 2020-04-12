@@ -27,15 +27,15 @@ def macd(dataframe, fast=12, slow=26, signal=9):
     df["MA_Fast"] = df["Adj Close"].ewm(span=fast, min_periods=fast).mean()
     df["MA_Slow"] = df["Adj Close"].ewm(span=slow, min_periods=slow).mean()
 
-    df["MACD"] = df["MA_Fast"] - df["MA_Slow"]
-    df["Signal"] = df["MACD"].ewm(span=signal, min_periods=signal).mean()
-    df.dropna(inplace=True)
+    df["macd"] = df["MA_Fast"] - df["MA_Slow"]
+    df["macd_signal"] = df["macd"].ewm(span=signal, min_periods=signal).mean()
+    # df.dropna(inplace=True)
 
     # This yields the same result, but the periods aren't adjustable.
     # stock = sdf.retype(col_rename(dataframe.copy()))
     # df["MACD_2"] = stock.get('macd')
 
-    return df
+    return df[["macd", "macd_signal"]]
 
 
 def atr(dataframe, period=20):
@@ -57,16 +57,16 @@ def atr(dataframe, period=20):
     df['H-L'] = abs(df['High']-df['Low'])
     df['H-PC'] = abs(df['High']-df['Adj Close'].shift(1))
     df['L-PC'] = abs(df['Low']-df['Adj Close'].shift(1))
-    df['TR'] = df[['H-L', 'H-PC', 'L-PC']].max(axis=1, skipna=False)
+    df['tr'] = df[['H-L', 'H-PC', 'L-PC']].max(axis=1, skipna=False)
 
-    df['ATR'] = df['TR'].rolling(period).mean()
+    df['atr'] = df['tr'].rolling(period).mean()
     df.drop(['H-L', 'H-PC', 'L-PC'], axis=1, inplace=True)
     #df.dropna(inplace=True)
 
     # This delivers something else.
     # stock = sdf.retype(col_rename(dataframe.copy()))
     # df["ATR_2"] = stock.get('atr')
-    return df
+    return df[['atr', 'tr']]
 
 
 def bollinger_band(dataframe, period=20):
@@ -90,14 +90,14 @@ def bollinger_band(dataframe, period=20):
     df["BB_dn"] = df["MA"] - 2*std
     df["BB_width"] = df["BB_up"] - df["BB_dn"]
 
-    df.dropna(inplace=True)
+    # df.dropna(inplace=True)
 
     # This delivers different values as well. No idea what n is here.
     # stock = sdf.retype(col_rename(dataframe.copy()))
     # df["BB_up_2"] = stock.get('boll_ub')
     # df["BB_dn_2"] = stock.get('boll_lb')
     # df["BB_width_2"] = stock.get('boll')
-    return df
+    return df["BB_width"]
 
 
 def rsi(dataframe, period=14):
@@ -130,14 +130,14 @@ def rsi(dataframe, period=14):
     # rolling mean of the period for the gains divided by the rolling mean of the period for the losses
     df['RS'] = df['gain'].ewm(com=period-1, adjust=False).mean() / df['loss'].ewm(com=period-1, adjust=False).mean()
 
-    df['RSI'] = 100 - (100 / (1 + df['RS']))
+    df['rsi'] = 100 - (100 / (1 + df['RS']))
 
     # RSI is only available from stockstats for a period of 6 and 12
     # stock = sdf.retype(col_rename(dataframe.copy()))
     # df["RSI_2_6"] = stock.get('rsi_6')
     # df["RSI_2_12"] = stock.get('rsi_12')
 
-    return df
+    return df['rsi']
 
 
 def adx(dataframe, period=14):
@@ -156,7 +156,7 @@ def adx(dataframe, period=14):
     """
     df = dataframe.copy()
 
-    df['TR'] = atr(df, period)['TR'] #the period doesn't influence the TR col
+    df['tr'] = atr(df, period)['tr'] #the period doesn't influence the TR col
 
     # if cur high - prev high > prev low - cur low --> plus directional movement = cur high - prev high
     df['DMplus'] = np.where((df['High'] - df['High'].shift(1)) > (df['Low'].shift(1) - df['Low']),
@@ -173,7 +173,7 @@ def adx(dataframe, period=14):
                               0, df['DMminus'])
 
     # smooth the sums of these three cols for a period of n
-    df['TR_wws'] = wws(df['TR'], period)
+    df['TR_wws'] = wws(df['tr'], period)
     df['DMplus_wws'] = wws(df['DMplus'], period)
     df['DMminus_wws'] = wws(df['DMminus'], period)
 
@@ -190,10 +190,10 @@ def adx(dataframe, period=14):
 
     # find the smoothed average for a period of n
     df.dropna(inplace=True)
-    df['ADX'] = wwma(df['DX'], period)
+    df['adx'] = wwma(df['DX'], period)
 
     df.dropna(inplace=True)
-    return df['ADX']
+    return df['adx']
 
 
 def wws(column, period):
@@ -257,14 +257,14 @@ def obv(dataframe):
     """
     df = dataframe.copy()
 
-    df['OBV'] = np.where(df['Adj Close'] > df['Adj Close'].shift(1), df['Volume'],
+    df['obv'] = np.where(df['Adj Close'] > df['Adj Close'].shift(1), df['Volume'],
                            np.where(df['Adj Close'] < df['Adj Close'].shift(1), -df['Volume'],
                                     0)).cumsum()
 
-    return df
+    return df['obv']
 
 
-def slope(dataframe, period=5):
+def slope(dataframe, col_name = 'Adj Close', period=5):
     """slope
     Calculates the slope of 'Adj Close' over a period of n.
 
@@ -276,7 +276,7 @@ def slope(dataframe, period=5):
     """
     df = dataframe.copy()
 
-    column = df['Adj Close']
+    column = df[col_name]
 
     # list for slope values in window
     slopes = [np.NaN for i in range(period-1)]
@@ -303,7 +303,7 @@ def slope(dataframe, period=5):
     # not the same thing?
     # df['close'] = df['Adj Close']
     # print(df[['close']].ta.slope(as_angle=True, offset=5))
-    return df
+    return df['slope_angle']
 
 
 def renko(dataframe):
@@ -319,13 +319,28 @@ def renko(dataframe):
         pd.Dataframe: Frame with renko col appended.
     """
     df = dataframe.copy()
-    brick_size = round(atr(df, 120)['ATR'][-1], 0)
+    brick_size = max(0.5, round(atr(df, 120)['atr'][-1], 0))
     df.reset_index(inplace=True)
 
     df_renko = Renko(col_rename(df))
     df_renko.brick_size = brick_size
 
-    return df_renko.get_ohlc_data()
+    df_ohlc_renko = df_renko.get_ohlc_data()
+    df_ohlc_renko["renko_bar_num"] = np.where(df_ohlc_renko["uptrend"], 1,
+                                        np.where(df_ohlc_renko["uptrend"] == False, -1, 0))
+
+    for i in range(1, len(df_ohlc_renko["renko_bar_num"])):
+        if df_ohlc_renko["renko_bar_num"][i] > 0 and df_ohlc_renko["renko_bar_num"][i-1] > 0:
+            df_ohlc_renko["renko_bar_num"][i] += df_ohlc_renko["renko_bar_num"][i-1]
+        elif df_ohlc_renko["renko_bar_num"][i] < 0 and df_ohlc_renko["renko_bar_num"][i-1] < 0:
+            df_ohlc_renko["renko_bar_num"][i] += df_ohlc_renko["renko_bar_num"][i-1]
+
+
+    df_merged = df.merge(df_ohlc_renko.loc[:, ["date", "renko_bar_num"]], how="outer", on="date")
+    df_merged["renko_bar_num"].fillna(method='ffill', inplace=True)
+    df_merged.set_index('date', inplace=True)
+
+    return df_merged['renko_bar_num']
 
 
 def col_rename(df):
