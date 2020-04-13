@@ -9,7 +9,8 @@ import paper_pants.data_collection.API.stock_api as sa
 import paper_pants.trading_strategies.strategies.technical_indicators.ohlcv_ti as ti
 from paper_pants.trading_strategies.backtesting.kpis.kpi import CAGR, volatility, sharpe, sortino, max_dd, calmar
 import paper_pants.portfolio.portfolio as pfl
-import paper_pants.trading_strategies.strategies.strategies as stgy
+import paper_pants.trading_strategies.strategies.strategies as st
+import paper_pants.trading_strategies.backtesting.backtest as bt
 
 import pandas_datareader.data as pdr
 
@@ -50,10 +51,26 @@ if __name__ == "__main__":
     # print(ti.slope(ohlcv, 5))
     # print(ti.renko(ohlcv))
 
-    ohlcv = pdr.get_data_yahoo('MSFT', startDate, endDate)
-    # print(ti.macd(ohlcv, 12, 26, 9))
-    st = stgy.Strategy(ohlcv)
-    # st.resist_breakout()
-    # st.renko_obv()
-    st.renko_macd()
-    print(st)
+    tickers = ['MSFT', 'AAPL']
+    tickers_strategy = {}
+
+    for ticker in tickers:
+        ohlcv = pdr.get_data_yahoo(ticker, startDate, endDate)
+        st_ren_macd = st.Strategy(ohlcv)
+        st_ren_macd.renko_macd()
+        bt.Backtest(st_ren_macd)
+        tickers_strategy[ticker] = st_ren_macd.df
+
+        print(tickers_strategy[ticker])
+
+    # st_rb = stgy.Strategy(ohlcv)
+    # st_rb.resist_breakout()
+    # print(bt.Backtest(st_rb))
+
+    # st_ren_obv = stgy.Strategy(ohlcv)
+    # st_ren_obv.renko_obv()
+    # print(bt.Backtest(st_ren_obv))
+
+    # st_ren_macd = st.Strategy(ohlcv)
+    # st_ren_macd.renko_macd()
+    # print(bt.Backtest(st_ren_macd))

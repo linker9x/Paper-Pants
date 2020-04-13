@@ -8,11 +8,12 @@ _strategies = ['rebalancing', 'resist_breakout', 'renko_obv', 'renko_macd']
 class Strategy(object):
     def __init__(self, dataframe):
         self.df = copy.deepcopy(dataframe)
+        self.name = None
         self._calculate_all()
 
 
     def __str__(self):
-        return ('df: {}'.format(self.df))
+        return ('Strategy: {} \n df: {}'.format(self.name, self.df))
 
     def _calculate_all(self):
         df = self.df
@@ -27,6 +28,8 @@ class Strategy(object):
 
     def resist_breakout(self):
         df = self.df
+        self.name = 'resist_breakout'
+
         df["roll_max_high"] = df["High"].rolling(20).max()
         df["roll_min_low"] = df["Low"].rolling(20).min()
         df["roll_max_vol"] = df["Volume"].rolling(20).max()
@@ -65,11 +68,12 @@ class Strategy(object):
         df["new_signal"] = np.array(new_signal)
 
         self.df = df
-        df.to_csv('./look.csv')
+        #df.to_csv('./look.csv')
 
 
     def renko_obv(self):
         df = self.df
+        self.name = 'renko_obv'
 
         df["obv_slope"] = ti.slope(df, col_name='obv')
 
@@ -107,10 +111,11 @@ class Strategy(object):
         df["new_signal"] = np.array(new_signal)
 
         self.df = df
-        df.to_csv('./look.csv')
+        #df.to_csv('./look.csv')
 
     def renko_macd(self):
         df = self.df
+        self.name = 'renko_macd'
 
         df["macd_slope"] = ti.slope(df, col_name='macd')
         df["macd_sig_slope"] = ti.slope(df, col_name='macd_signal')
@@ -153,4 +158,4 @@ class Strategy(object):
         df["new_signal"] = np.array(new_signal)
 
         self.df = df
-        df.to_csv('./look.csv')
+        #df.to_csv('./look.csv')

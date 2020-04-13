@@ -326,6 +326,7 @@ def renko(dataframe):
     df_renko.brick_size = brick_size
 
     df_ohlc_renko = df_renko.get_ohlc_data()
+    df_ohlc_renko.to_csv('./mine_uptrend.csv')
     df_ohlc_renko["renko_bar_num"] = np.where(df_ohlc_renko["uptrend"], 1,
                                         np.where(df_ohlc_renko["uptrend"] == False, -1, 0))
 
@@ -335,7 +336,7 @@ def renko(dataframe):
         elif df_ohlc_renko["renko_bar_num"][i] < 0 and df_ohlc_renko["renko_bar_num"][i-1] < 0:
             df_ohlc_renko["renko_bar_num"][i] += df_ohlc_renko["renko_bar_num"][i-1]
 
-
+    df_ohlc_renko.drop_duplicates(subset="date", keep="last", inplace=True)
     df_merged = df.merge(df_ohlc_renko.loc[:, ["date", "renko_bar_num"]], how="outer", on="date")
     df_merged["renko_bar_num"].fillna(method='ffill', inplace=True)
     df_merged.set_index('date', inplace=True)
