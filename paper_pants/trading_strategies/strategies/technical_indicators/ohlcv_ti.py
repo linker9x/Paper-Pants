@@ -9,8 +9,8 @@ import statsmodels.api as sm
 
 def macd(dataframe, fast=12, slow=26, signal=9):
     """macd
-    Returns the Moving Average Convergence Divergence (MACD) of the 'Adj Close' col. MACD is a momentum indicator that
-    shows the relationship between a fast and slow moving average of the 'Adj Close' price. Default MACD is calculated
+    Returns the Moving Average Convergence Divergence (MACD) of the 'Close' col. MACD is a momentum indicator that
+    shows the relationship between a fast and slow moving average of the 'Close' price. Default MACD is calculated
     by subtracting the 26-period Exponential Moving Average (EMA) from the 12-period EMA. A nine-day EMA of the MACD
     is then calculated to function as a buy/sell signal.
 
@@ -24,8 +24,8 @@ def macd(dataframe, fast=12, slow=26, signal=9):
     """
     df = dataframe.copy()
 
-    df["MA_Fast"] = df["Adj Close"].ewm(span=fast, min_periods=fast).mean()
-    df["MA_Slow"] = df["Adj Close"].ewm(span=slow, min_periods=slow).mean()
+    df["MA_Fast"] = df["Close"].ewm(span=fast, min_periods=fast).mean()
+    df["MA_Slow"] = df["Close"].ewm(span=slow, min_periods=slow).mean()
 
     df["macd"] = df["MA_Fast"] - df["MA_Slow"]
     df["macd_signal"] = df["macd"].ewm(span=signal, min_periods=signal).mean()
@@ -55,8 +55,8 @@ def atr(dataframe, period=20):
     df = dataframe.copy()
 
     df['H-L'] = abs(df['High']-df['Low'])
-    df['H-PC'] = abs(df['High']-df['Adj Close'].shift(1))
-    df['L-PC'] = abs(df['Low']-df['Adj Close'].shift(1))
+    df['H-PC'] = abs(df['High']-df['Close'].shift(1))
+    df['L-PC'] = abs(df['Low']-df['Close'].shift(1))
     df['tr'] = df[['H-L', 'H-PC', 'L-PC']].max(axis=1, skipna=False)
 
     df['atr'] = df['tr'].rolling(period).mean()
@@ -83,8 +83,8 @@ def bollinger_band(dataframe, period=20):
     """
     df = dataframe.copy()
 
-    df['MA'] = df['Adj Close'].rolling(period).mean()
-    std = df['Adj Close'].rolling(period).std(ddof=0)  # ddof=0 for std of the population
+    df['MA'] = df['Close'].rolling(period).mean()
+    std = df['Close'].rolling(period).std(ddof=0)  # ddof=0 for std of the population
 
     df["BB_up"] = df["MA"] + 2*std
     df["BB_dn"] = df["MA"] - 2*std
@@ -97,7 +97,7 @@ def bollinger_band(dataframe, period=20):
     # df["BB_up_2"] = stock.get('boll_ub')
     # df["BB_dn_2"] = stock.get('boll_lb')
     # df["BB_width_2"] = stock.get('boll')
-    return df["BB_width"]
+    return df[["BB_width"]]
 
 
 def rsi(dataframe, period=14):
@@ -115,8 +115,8 @@ def rsi(dataframe, period=14):
     """
     df = dataframe.copy()
 
-    # difference between cur 'Adj Close' and prev 'Adj Close'
-    df['delta'] = df['Adj Close'].diff().dropna()
+    # difference between cur 'Close' and prev 'Close'
+    df['delta'] = df['Close'].diff().dropna()
 
     # gains and losses
     df['gain'] = np.where(df['delta'] >= 0, df['delta'], 0)
@@ -137,7 +137,7 @@ def rsi(dataframe, period=14):
     # df["RSI_2_6"] = stock.get('rsi_6')
     # df["RSI_2_12"] = stock.get('rsi_12')
 
-    return df['rsi']
+    return df[['rsi']]
 
 
 def adx(dataframe, period=14):
@@ -193,7 +193,7 @@ def adx(dataframe, period=14):
     df['adx'] = wwma(df['DX'], period)
 
     df.dropna(inplace=True)
-    return df['adx']
+    return df[['adx']]
 
 
 def wws(column, period):
@@ -257,16 +257,16 @@ def obv(dataframe):
     """
     df = dataframe.copy()
 
-    df['obv'] = np.where(df['Adj Close'] > df['Adj Close'].shift(1), df['Volume'],
-                           np.where(df['Adj Close'] < df['Adj Close'].shift(1), -df['Volume'],
+    df['obv'] = np.where(df['Close'] > df['Close'].shift(1), df['Volume'],
+                           np.where(df['Close'] < df['Close'].shift(1), -df['Volume'],
                                     0)).cumsum()
 
-    return df['obv']
+    return df[['obv']]
 
 
-def slope(dataframe, col_name = 'Adj Close', period=5):
+def slope(dataframe, col_name = 'Close', period=5):
     """slope
-    Calculates the slope of 'Adj Close' over a period of n.
+    Calculates the slope of 'Close' over a period of n.
 
     Args:
         dataframe (pd.Dataframe): Dataframe with ohlcv data.
@@ -282,7 +282,7 @@ def slope(dataframe, col_name = 'Adj Close', period=5):
     slopes = [np.NaN for i in range(period-1)]
 
     for i in range(period, len(column)+1):
-        # window -> i.e. row values 0 to 4 of Adj Close
+        # window -> i.e. row values 0 to 4 of Close
         y = column[i-period:i]
 
         # [0, 1, 2, 3, 4]
@@ -301,9 +301,9 @@ def slope(dataframe, col_name = 'Adj Close', period=5):
     df['slope_angle'] = np.array(slope_angle)
 
     # not the same thing?
-    # df['close'] = df['Adj Close']
+    # df['close'] = df['Close']
     # print(df[['close']].ta.slope(as_angle=True, offset=5))
-    return df['slope_angle']
+    return df[['slope_angle']]
 
 
 def renko(dataframe):
@@ -320,6 +320,7 @@ def renko(dataframe):
     """
     df = dataframe.copy()
     brick_size = max(0.5, round(atr(df, 120)['atr'][-1], 0))
+    print(df)
     df.reset_index(inplace=True)
 
     df_renko = Renko(col_rename(df))
@@ -341,7 +342,7 @@ def renko(dataframe):
     df_merged["renko_bar_num"].fillna(method='ffill', inplace=True)
     df_merged.set_index('date', inplace=True)
 
-    return df_merged['renko_bar_num']
+    return df_merged[['renko_bar_num']]
 
 
 def col_rename(df):
@@ -354,6 +355,6 @@ def col_rename(df):
         pd.Dataframe: Dataframe with lowercase headers.
     """
     df.drop('Close', axis=1, inplace=True)
-    df.rename(columns={"Date": "date", "High": "high", "Low": "low", "Open": "open", "Adj Close": "close",
+    df.rename(columns={"Date": "date", "High": "high", "Low": "low", "Open": "open", "Close": "close",
                        "Volume": "volume"}, inplace=True)
     return df

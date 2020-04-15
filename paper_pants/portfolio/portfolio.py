@@ -1,13 +1,15 @@
 from datetime import date, datetime, timedelta, time
 import paper_pants.data_collection.API.stock_api as sa
+import paper_pants.trading_strategies.strategies.strategies as st
 
-class PortfolioManager(object):
-    def __init__(self, portfolio):
-        self.portfolio = portfolio
-        self.intraday_data = {}
-        self.daily_data = {}
-        self.monthly_data = {}
-        self.yearly_data = {}
+class Portfolio(object):
+    def __init__(self, tickers, strategy = None):
+        self.tickers = tickers
+        self.strategy = strategy
+        self.historic_data = {'intraday': None,
+                              'daily': None,
+                              'monthly': None,
+                              'yearly': None}
 
         startDate = datetime.combine(date.today(), time()) - timedelta(1095)
         endDate = datetime.combine(date.today(), time())
@@ -17,7 +19,13 @@ class PortfolioManager(object):
         return 'Portfolio: {}'.format(self.portfolio)
 
     def get_historic_data(self, startDate, endDate, period='daily'):
-        new_tickers = [ticker for ticker in self.portfolio if ticker not in self.daily_data.keys()]
-        sA = sa.StockApi(new_tickers)
-        sA.get_data_pd_yahoo(startDate, endDate).to_csv('./what.csv')
+        sA = sa.StockApi(self.tickers)
+        temp = sA.get_data_pd_yahoo(startDate, endDate)
+        self.historic_data['daily'] = temp
 
+    def set_strategy(self):
+
+        return None
+
+    def run_backtest(self):
+        return None
