@@ -4,7 +4,7 @@ import datetime
 import pandas as pd
 from bs4 import BeautifulSoup
 
-yahoo = {
+_yahoo = {
     'Balance Sheet': '/balance-sheet?p=',
     'Income Statement': '/financials?p=',
     'Cash Flow': '/cash-flow?p=',
@@ -73,13 +73,13 @@ class StatementScraper(object):
         """
 
         # Key Ratio HTML code is different from the HTML code for the statements, so it has to be scraped separately
-        statements = [yp for yp in self.pages if yp in yahoo and yp != 'Key Ratios']
+        statements = [yp for yp in self.pages if yp in _yahoo and yp != 'Key Ratios']
 
         # Currently IS, BS and CF
         for ys in statements:
             for company in self.companies:
                 temp_dir = {}   #holds the scraped data for the current iteration
-                url = 'https://in.finance.yahoo.com/quote/' + company + yahoo[ys] + company # statement URL
+                url = 'https://in.finance.yahoo.com/quote/' + company + _yahoo[ys] + company # statement URL
 
                 try:
                     page_content = requests.get(url, timeout=5).content
@@ -118,7 +118,7 @@ class StatementScraper(object):
 
         for company in self.companies:
             temp_dir = {}
-            url = 'https://in.finance.yahoo.com/quote/' + company + yahoo['Key Ratios'] + company # stats page url
+            url = 'https://in.finance.yahoo.com/quote/' + company + _yahoo['Key Ratios'] + company # stats page url
 
             try:
                 page_content = requests.get(url, timeout=5).content

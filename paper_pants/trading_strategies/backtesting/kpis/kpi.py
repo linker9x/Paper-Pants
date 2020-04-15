@@ -1,6 +1,7 @@
 import pandas as pd 
 import numpy as np
 
+_rf = 0.025
 
 def CAGR(dataframe:pd.DataFrame, period:str)->float:
     """CAGR
@@ -85,7 +86,7 @@ def volatility(dataframe:pd.DataFrame, period:str)->float:
         raise ValueError("Period has a wrong value")    
     return vol
 
-def sharpe(dataframe:pd.DataFrame, period:str, rf:float)->float:
+def sharpe(dataframe:pd.DataFrame, period:str, rf:float=_rf)->float:
     """
         function to calculate sharpe ratio ; rf is the risk free rate
         In finance, the Sharpe ratio (also known as the Sharpe index, the Sharpe measure, and the reward-to-variability ratio) measures the performance of an investment (e.g., a security or portfolio) compared to a risk-free asset, after adjusting for its risk. 
@@ -111,7 +112,7 @@ def sharpe(dataframe:pd.DataFrame, period:str, rf:float)->float:
     sr = (CAGR(df, period) - rf)/volatility(df, period)
     return sr
     
-def sortino(dataframe:pd.DataFrame, period:str, rf:float)->float:
+def sortino(dataframe:pd.DataFrame, period:str, rf:float=_rf)->float:
     """
         function to calculate sortino ratio ; rf is the risk free rate
         
