@@ -1,6 +1,6 @@
 from datetime import date, datetime, timedelta, time
 import paper_pants.data_collection.API.stock_api as sa
-import paper_pants.trading_strategies.strategies.strategies as st
+import paper_pants.trading_strategies.strategies as st
 
 class Portfolio(object):
     def __init__(self, tickers, strategy = None):
@@ -22,10 +22,3 @@ class Portfolio(object):
         sA = sa.StockApi(self.tickers)
         temp = sA.get_data_pd_yahoo(startDate, endDate)
         self.historic_data['daily'] = temp
-
-    def set_strategy(self):
-
-        return None
-
-    def run_backtest(self):
-        return None
