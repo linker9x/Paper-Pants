@@ -110,7 +110,8 @@ class StockApi(object):
             tickers = [company for company in self._companies if company not in drop]
             attempt += 1
         print('fetching data finished!')
-        return stock_data.fillna(method='bfill', axis=0)
+        # return stock_data.fillna(method='bfill', axis=0)
+        return stock_data
 
     def get_data_yahoofinancials(self, startDate:datetime, endDate:datetime, interval:str = 'daily')->pd.DataFrame:
         """
@@ -231,6 +232,6 @@ class StockApi(object):
             tickers = [company for company in self._companies if company not in drop]
             attempt += 1
         print('fetching data finished!')
-        return stock_data.fillna(method='bfill', axis=0).sort_index()
+        # return stock_data.fillna(method='bfill', axis=0).sort_index()
 
    

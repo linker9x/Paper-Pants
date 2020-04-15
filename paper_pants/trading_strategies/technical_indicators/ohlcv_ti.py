@@ -9,8 +9,8 @@ import statsmodels.api as sm
 
 def macd(dataframe, fast=12, slow=26, signal=9):
     """macd
-    Returns the Moving Average Convergence Divergence (MACD) of the 'Adj Close' col. MACD is a momentum indicator that
-    shows the relationship between a fast and slow moving average of the 'Adj Close' price. Default MACD is calculated
+    Returns the Moving Average Convergence Divergence (MACD) of the 'Close' col. MACD is a momentum indicator that
+    shows the relationship between a fast and slow moving average of the 'Adj Adj Close' price. Default MACD is calculated
     by subtracting the 26-period Exponential Moving Average (EMA) from the 12-period EMA. A nine-day EMA of the MACD
     is then calculated to function as a buy/sell signal.
 
@@ -97,7 +97,7 @@ def bollinger_band(dataframe, period=20):
     # df["BB_up_2"] = stock.get('boll_ub')
     # df["BB_dn_2"] = stock.get('boll_lb')
     # df["BB_width_2"] = stock.get('boll')
-    return df["BB_width"]
+    return df[["BB_width"]]
 
 
 def rsi(dataframe, period=14):
@@ -137,7 +137,7 @@ def rsi(dataframe, period=14):
     # df["RSI_2_6"] = stock.get('rsi_6')
     # df["RSI_2_12"] = stock.get('rsi_12')
 
-    return df['rsi']
+    return df[['rsi']]
 
 
 def adx(dataframe, period=14):
@@ -193,7 +193,7 @@ def adx(dataframe, period=14):
     df['adx'] = wwma(df['DX'], period)
 
     df.dropna(inplace=True)
-    return df['adx']
+    return df[['adx']]
 
 
 def wws(column, period):
@@ -261,7 +261,7 @@ def obv(dataframe):
                            np.where(df['Adj Close'] < df['Adj Close'].shift(1), -df['Volume'],
                                     0)).cumsum()
 
-    return df['obv']
+    return df[['obv']]
 
 
 def slope(dataframe, col_name = 'Adj Close', period=5):
@@ -303,7 +303,7 @@ def slope(dataframe, col_name = 'Adj Close', period=5):
     # not the same thing?
     # df['close'] = df['Adj Close']
     # print(df[['close']].ta.slope(as_angle=True, offset=5))
-    return df['slope_angle']
+    return df[['slope_angle']]
 
 
 def renko(dataframe):
@@ -320,13 +320,14 @@ def renko(dataframe):
     """
     df = dataframe.copy()
     brick_size = max(0.5, round(atr(df, 120)['atr'][-1], 0))
+
     df.reset_index(inplace=True)
 
     df_renko = Renko(col_rename(df))
     df_renko.brick_size = brick_size
 
     df_ohlc_renko = df_renko.get_ohlc_data()
-    df_ohlc_renko.to_csv('./mine_uptrend.csv')
+
     df_ohlc_renko["renko_bar_num"] = np.where(df_ohlc_renko["uptrend"], 1,
                                         np.where(df_ohlc_renko["uptrend"] == False, -1, 0))
 
@@ -341,7 +342,7 @@ def renko(dataframe):
     df_merged["renko_bar_num"].fillna(method='ffill', inplace=True)
     df_merged.set_index('date', inplace=True)
 
-    return df_merged['renko_bar_num']
+    return df_merged[['renko_bar_num']]
 
 
 def col_rename(df):
