@@ -24,7 +24,8 @@ if __name__ == "__main__":
 
     sA = sa.StockApi(companies, alpha_key_path='/app/api.key')
     
-    ohlcv = sA.get_data_pd_yahoo(startDate, endDate)
+    ohlcv = sA.get_data_pd_yahoo(startDate, endDate) 
+
     print('CAGR: {}'.format(CAGR(ohlcv['MSFT'], 'd' )))
     print('Volatility: {}'.format(volatility(ohlcv['MSFT'], 'd' )))
     print('Shapre: {}'.format(sharpe(ohlcv['MSFT'], 'd', 0.022 )))
@@ -33,11 +34,12 @@ if __name__ == "__main__":
     print('Calmar: {}'.format(calmar(ohlcv['MSFT'], 'd' )))
 
 
-    # print(sA.get_data_yahoofinancials(startDate,endDate))
-    # print(sA.get_data_alpha_vantage(startDate, endDate))
+    #print(sA.get_data_yahoofinancials(startDate,endDate))
+    #print(sA.get_data_alpha_vantage(startDate, endDate))
 
-    ticker = "MSFT"
-    ohlcv = pdr.get_data_yahoo(ticker, datetime.date.today() - datetime.timedelta(1825), datetime.date.today())
+    ticker = ["MSFT", "AAPL"]
+    ohlcv = pdr.get_data_yahoo(ticker, date.today() - timedelta(1825), date.today())
+
 
     # print(ti.macd(ohlcv, 12, 26, 9))
     # print(ti.atr(ohlcv, 20))
@@ -45,6 +47,6 @@ if __name__ == "__main__":
     # print(ti.rsi(ohlcv, 14))
     # print(ti.adx(ohlcv, 14))
     # print(ti.obv(ohlcv))
-    print(ti.slope(ohlcv, 5))
+    # print(ti.slope(ohlcv, 5))
     # print(ti.renko(ohlcv))
 
