@@ -97,8 +97,8 @@ class StockApi(object):
             print('-----------------')
             for i in range(len(tickers)):
                 try:
-                    tmpStockData = pdr.get_data_yahoo(tickers[i], startDate, endDate, interval=interval) 
-                    tmpStockData.columns = ['Date', 'Open', 'Low', 'High','Close', 'Volume']
+                    tmpStockData = pdr.get_data_yahoo(tickers[i], startDate, endDate, interval=interval)  
+                    tmpStockData = tmpStockData[['Open', 'Low', 'High', 'Close', 'Adj Close', 'Volume']]
                     tmpStockData = pd.concat([tmpStockData], keys=[tickers[i]], axis=1)
                     if stock_data is not None:
                         stock_data = stock_data.join(tmpStockData)
@@ -146,9 +146,10 @@ class StockApi(object):
                 try:
                     yahoo_financials = YahooFinancials(tickers[i])
                     json_response = yahoo_financials.get_historical_price_data(startDate.strftime('%Y-%m-%d'), endDate.strftime('%Y-%m-%d'), interval)
+
                     ohlv = json_response[tickers[i]]['prices']
-                    tmpStockData = pd.DataFrame(ohlv)[['formatted_date','open', 'low', 'high', 'adjclose', 'volume']]
-                    tmpStockData.columns = ['Date', 'Open', 'Low', 'High','Close', 'Volume']
+                    tmpStockData = pd.DataFrame(ohlv)[['formatted_date','open', 'low', 'high', 'close', 'adjclose', 'volume']]
+                    tmpStockData.columns = ['Date', 'Open', 'Low', 'High','Close', 'Adj Close', 'Volume']
                     tmpStockData.set_index('Date', inplace=True)                    
                     tmpStockData2 = tmpStockData[~tmpStockData.index.duplicated(keep='first')]
                     tmpStockData2 = pd.concat([tmpStockData2], keys=[tickers[i]], axis=1)
@@ -211,7 +212,11 @@ class StockApi(object):
                         tmpStockData = ts.get_monthly(symbol=tickers[i])[0]
                     else:
                         print('wrong interval')
-                        return pd.DataFrame()                     
+                        return pd.DataFrame()   
+
+             
+                    tmpStockData = tmpStockData[['1. open', '3. low', '2. high', '4. close', '5. volume']]             
+
                     tmpStockData.columns = [ 'Open', 'Low', 'High','Close', 'Volume']     
                     tmpStockData.index.names = ['Date']           
                     tmpStockData = pd.concat([tmpStockData], keys=[tickers[i]], axis=1)

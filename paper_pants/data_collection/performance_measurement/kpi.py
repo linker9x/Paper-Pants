@@ -32,7 +32,11 @@ def CAGR(dataframe:pd.DataFrame, period:str)->float:
         float
     """
     df = dataframe.copy()
-    df['ret'] = dataframe['Close'].pct_change()
+    if 'Adj Close' in df:
+        df['ret'] = dataframe['Adj Close'].pct_change()
+    else:
+        df['ret'] = dataframe['Close'].pct_change()
+
     df['cum_return'] = (1 + df['ret']).cumprod()
     if period == 'daily' or period == 'd':
         n = len(df)/252
@@ -67,7 +71,10 @@ def volatility(dataframe:pd.DataFrame, period:str)->float:
         float
     """
     df = dataframe.copy()
-    df["ret"] = dataframe["Close"].pct_change()
+    if 'Adj Close' in df:
+        df['ret'] = dataframe['Adj Close'].pct_change()
+    else:
+        df['ret'] = dataframe['Close'].pct_change()
     if period == 'daily' or period == 'd':
         vol = df["ret"].std() * np.sqrt(252)
     elif period == 'weekly' or period == 'w':
@@ -133,7 +140,10 @@ def sortino(dataframe:pd.DataFrame, period:str, rf:float)->float:
     
     """
     df = dataframe.copy()
-    df["ret"] = dataframe["Close"].pct_change()
+    if 'Adj Close' in df:
+        df['ret'] = dataframe['Adj Close'].pct_change()
+    else:
+        df['ret'] = dataframe['Close'].pct_change()
     if period == 'daily' or period == 'd':        
         neg_vol = df[df["ret"]<0]["ret"].std() * np.sqrt(252)
     elif period == 'weekly' or period == 'w':        
@@ -161,7 +171,10 @@ def max_dd(dataframe:pd.DataFrame)->float:
         float
     """
     df = dataframe.copy()
-    df["ret"] = dataframe["Close"].pct_change()
+    if 'Adj Close' in df:
+        df['ret'] = dataframe['Adj Close'].pct_change()
+    else:
+        df['ret'] = dataframe['Close'].pct_change()
     df["cum_return"] = (1 + df["ret"]).cumprod()
     df["cum_roll_max"] = df["cum_return"].cummax()
     df["drawdown"] = df["cum_roll_max"] - df["cum_return"]
