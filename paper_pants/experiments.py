@@ -16,7 +16,7 @@ endDate = datetime.combine(date.today(), time())
 
 
 if __name__ == "__main__":
-    tickers = ['MSFT', 'AAPL']
+    tickers = ['MSFT']
     # portfolio = pt.Portfolio(tickers)
     # test_strategy = st.Strategy(portfolio, 'daily')
     # test_strategy.renko_macd()

@@ -143,7 +143,7 @@ class StatementScraper(object):
                     for r in rows:
                         row_text = r.get_text(separator='|').split("|")
                         # cell 0 has the key, cell -1 has the value (most recent fy end), empty text between
-                        temp_dir[row_text[0]] = row_text[-1]
+                        temp_dir[row_text[0]] = self._parse_stat(row_text[-1])
 
                 df = pd.DataFrame(temp_dir, index=['Value'])
                 df = df.transpose()
@@ -160,3 +160,20 @@ class StatementScraper(object):
                 print('Request timed out')
 
         return stats_df
+
+    def _parse_stat(self, string):
+        temp = None
+
+        if 'M' in string and '-' not in string:
+            temp = re.sub(r'([-]?\d*[.]\d*)[M]', r'\g<1>E+03', string)
+        elif 'B' in string and '-' not in string:
+            temp = re.sub(r'([-]?\d*[.]\d*)[B]', r'\g<1>E+06', string)
+        elif 'T' in string and '-' not in string:
+            temp = re.sub(r'([-]?\d*[.]\d*)[T]', r'\g<1>E+09', string)
+        elif '%' in string:
+            temp = re.sub(r'([-]?\d*[.]\d*)[%]', r'\g<1>E-02', string)
+
+        if temp:
+            return temp
+
+        return string
