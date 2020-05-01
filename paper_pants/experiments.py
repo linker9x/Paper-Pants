@@ -35,6 +35,10 @@ if __name__ == "__main__":
     combined = yh_ws.scrape_yahoo() 
     magic = mf.MagicFormula(combined)
     magic.print()
+    yh_ws = ws.StatementScraper(pages, companies)
+    combined = yh_ws.scrape_yahoo() 
+    magic = mf.MagicFormula(combined)
+    magic.print()
     # yh_ws.scrape_yahoo()
     #
     # sA = sa.StockApi(companies, alpha_key_path='/app/api.key')
