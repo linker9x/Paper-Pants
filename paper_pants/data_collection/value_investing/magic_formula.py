@@ -22,13 +22,22 @@ class MagicFormula:
     stats = [stat.lower().strip() for stat in ["Market cap (intra-day)",
              "Forward annual dividend yield"]]
 
-    indx = ["EBITDA","D&A","MarketCap","NetIncome","CashFlowOps","Capex","CurrAsset",
-            "CurrLiab","PPE","BookValue","TotDebt","DivYield"]
+    indx_f = ["EBITDA","D&A", "NetIncome","CashFlowOps","Capex","CurrAsset",
+            "CurrLiab","PPE","BookValue","TotDebt"]
+
+    indx_s = ["MarketCap", "DivYield"]
 
 
     def __init__(self, combined_financials, stats):
         self.all_figures = combined_financials.loc[combined_financials.index.intersection(self.figures)]
         self.all_stats = stats.loc[stats.index.intersection(self.stats)]
+
+        rename_fig_dict = {self.figures[i]: self.indx_f[i] for i in range(len(self.figures))}
+        rename_stat_dict = {self.stats[i]: self.indx_s[i] for i in range(len(self.stats))}
+
+        self.all_figures = self.all_figures.rename(index=rename_fig_dict)
+        self.all_stats = self.all_stats.rename(rename_stat_dict)
+
         print(self.all_figures)
         print(self.all_stats)
         # self.__clean_data()

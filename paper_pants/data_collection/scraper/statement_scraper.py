@@ -109,7 +109,6 @@ class StatementScraper(object):
                     print('Request timed out')
 
             df = pd.DataFrame(temp_dir)
-            print(df)
             df.set_index("FYE", inplace=True)
             df = df.transpose()
             df = pd.concat([df], keys=[ticker], axis=1)
