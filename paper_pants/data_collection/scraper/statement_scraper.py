@@ -114,7 +114,7 @@ class StatementScraper(object):
             df = pd.concat([df], keys=[ticker], axis=1)
 
             if financial_df is not None:
-                financial_df = financial_df.join(df)
+                financial_df = financial_df.join(df, how='outer')
             else:
                 financial_df = df
 
@@ -150,7 +150,7 @@ class StatementScraper(object):
                 df = pd.concat([df], keys=[ticker], axis=1)
 
                 if stats_df is not None:
-                    stats_df = stats_df.join(df)
+                    stats_df = stats_df.join(df, how='outer')
                 else:
                     stats_df = df
 
