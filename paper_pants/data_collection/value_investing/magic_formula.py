@@ -8,9 +8,8 @@ import pandas as pd
 
 class MagicFormula:
     # creating dataframe with relevant financial information for each stock using fundamental data
-    stats = ["EBITDA",
+    figures = [fig.lower().strip() for fig in ["EBITDA",
             "Depreciation & amortisation",
-            "Market cap (intra-day)",
             "Net income available to common shareholders",
             "Net cash provided by operating activities",
             "Capital expenditure",
@@ -18,17 +17,22 @@ class MagicFormula:
             "Total current liabilities",
             "Net property, plant and equipment",
             "Total stockholders' equity",
-            "Long-term debt",
-            "Forward annual dividend yield"] # change as required
+            "Long-term debt"]] # change as required
+
+    stats = [stat.lower().strip() for stat in ["Market cap (intra-day)",
+             "Forward annual dividend yield"]]
 
     indx = ["EBITDA","D&A","MarketCap","NetIncome","CashFlowOps","Capex","CurrAsset",
             "CurrLiab","PPE","BookValue","TotDebt","DivYield"]
 
 
-    def __init__(self, combined_financials):
-        self.all_stats = combined_financials.loc[combined_financials.index.intersection(self.stats)]        
-        self.__clean_data()
-        self.__calc_relevant_metrics()
+    def __init__(self, combined_financials, stats):
+        self.all_figures = combined_financials.loc[combined_financials.index.intersection(self.figures)]
+        self.all_stats = stats.loc[stats.index.intersection(self.stats)]
+        print(self.all_figures)
+        print(self.all_stats)
+        # self.__clean_data()
+        # self.__calc_relevant_metrics()
 
     def __clean_data(self):
         all_stats_df = pd.DataFrame(self.all_stats,index=self.indx) 

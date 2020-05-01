@@ -100,7 +100,7 @@ class StatementScraper(object):
                             # all of the rows with relevant information have 4-6 cells in them
                             if len(cells) in [4, 5, 6]:
                                 row_text = r.get_text(separator='|').split("|")
-                                position = row_text[0]
+                                position = row_text[0].lower().strip()
                                 values = row_text[1:] if len(row_text) == 5 else row_text[-4:]
                                 values = ['0' if entry == '-' else entry for entry in values]
                                 temp_dir[position] = [float(entry.replace(',', '')) for entry in values]
@@ -109,6 +109,7 @@ class StatementScraper(object):
                     print('Request timed out')
 
             df = pd.DataFrame(temp_dir)
+            print(df)
             df.set_index("FYE", inplace=True)
             df = df.transpose()
             df = pd.concat([df], keys=[ticker], axis=1)
@@ -143,7 +144,7 @@ class StatementScraper(object):
                     for r in rows:
                         row_text = r.get_text(separator='|').split("|")
                         # cell 0 has the key, cell -1 has the value (most recent fy end), empty text between
-                        temp_dir[row_text[0]] = self._parse_stat(row_text[-1])
+                        temp_dir[row_text[0].lower().strip()] = self._parse_stat(row_text[-1])
 
                 df = pd.DataFrame(temp_dir, index=['Value'])
                 df = df.transpose()
