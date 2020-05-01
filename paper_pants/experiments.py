@@ -13,16 +13,19 @@ import paper_pants.trading_strategies.strategies.strategies as st
 import paper_pants.trading_strategies.backtesting.backtest as bt
 
 import pandas_datareader.data as pdr
+import paper_pants.data_collection.value_investing.magic_formula as mf
 
 pages = ['Balance Sheet', 'Income Statement', 'Cash Flow', 'Key Ratios']
-companies = ['MSFT']
+companies = ["AXP","AAPL"]
 startDate = datetime.combine(date.today(), time()) - timedelta(1095)
 endDate = datetime.combine(date.today(), time())
 
 
 if __name__ == "__main__":
-    # yh_ws = ws.StatementScraper(pages, companies)
-    # print(yh_ws)
+    yh_ws = ws.StatementScraper(pages, companies)
+    combined = yh_ws.scrape_yahoo() 
+    magic = mf.MagicFormula(combined)
+    magic.print()
     # yh_ws.scrape_yahoo()
     #
     # sA = sa.StockApi(companies, alpha_key_path='/app/api.key')
@@ -51,17 +54,17 @@ if __name__ == "__main__":
     # print(ti.slope(ohlcv, 5))
     # print(ti.renko(ohlcv))
 
-    tickers = ['MSFT', 'AAPL']
-    tickers_strategy = {}
+    # tickers = ['MSFT', 'AAPL']
+    # tickers_strategy = {}
 
-    for ticker in tickers:
-        ohlcv = pdr.get_data_yahoo(ticker, startDate, endDate)
-        st_ren_macd = st.Strategy(ohlcv)
-        st_ren_macd.renko_macd()
-        bt.Backtest(st_ren_macd)
-        tickers_strategy[ticker] = st_ren_macd.df
+    # for ticker in tickers:
+    #     ohlcv = pdr.get_data_yahoo(ticker, startDate, endDate)
+    #     st_ren_macd = st.Strategy(ohlcv)
+    #     st_ren_macd.renko_macd()
+    #     bt.Backtest(st_ren_macd)
+    #     tickers_strategy[ticker] = st_ren_macd.df
 
-        print(tickers_strategy[ticker])
+    #     print(tickers_strategy[ticker])
 
     # st_rb = stgy.Strategy(ohlcv)
     # st_rb.resist_breakout()

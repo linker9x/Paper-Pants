@@ -48,8 +48,8 @@ class StatementScraper(object):
         self.financials = {}
 
     def __str__(self):
-        return ('Name: %s, Type: %s, Companies: %s' % (self.name, self.pages, self.companies))
-
+        return ('Name: %s, Type: %s, Companies: %s' % (self.name, self.pages, self.companies)) 
+        
     def __save_financials(self, ID):
         """
         Save the results of the scrape as a .csv file.
@@ -63,7 +63,7 @@ class StatementScraper(object):
             if not os.path.exists(filepath):
                 os.mkdir(filepath)
 
-            combined_financials = pd.DataFrame(self.financials)
+            combined_financials = pd.DataFrame(self.financials)   
             combined_financials.to_csv(filepath + 'yahoo_webscrape_' + ID + '.csv', index=True, header=True)
 
     def __scrape_yahoo_statements(self):
@@ -162,4 +162,5 @@ class StatementScraper(object):
         self.__scrape_yahoo_statements()
 
         self.__save_financials(datetime.datetime.now().strftime("%d%m%Y_%H%M%S"))
+        return pd.DataFrame(self.financials)   
 
