@@ -26,9 +26,9 @@ class MagicFormula:
 
 
     def __init__(self, combined_financials):
-        self.all_stats = combined_financials.loc[combined_financials.index.intersection(self.stats)]
-        self.tickers = combined_financials.columns.tolist()
+        self.all_stats = combined_financials.loc[combined_financials.index.intersection(self.stats)]        
         self.__clean_data()
+        self.__calc_relevant_metrics()
 
     def __clean_data(self):
         all_stats_df = pd.DataFrame(self.all_stats,index=self.indx) 
@@ -39,7 +39,8 @@ class MagicFormula:
         all_stats_df = all_stats_df.replace({'%': 'E-02'}, regex=True) 
         all_stats_df = all_stats_df.apply(pd.to_numeric, errors='coerce')
         all_stats_df.dropna(axis=1,inplace=True)
-        self.all_stats = all_stats_df
+        self.all_stats = all_stats_df        
+        self.tickers = all_stats_df.columns.tolist()
 
     def __calc_relevant_metrics(self):
         transpose_df = self.all_stats.transpose()
