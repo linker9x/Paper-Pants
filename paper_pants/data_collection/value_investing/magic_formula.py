@@ -2,8 +2,6 @@
 # Greenblatt's Magic Formula Implementation
 # =============================================================================
 
-import requests
-from bs4 import BeautifulSoup
 import pandas as pd
 
 class MagicFormula:
@@ -29,6 +27,11 @@ class MagicFormula:
 
 
     def __init__(self, combined_financials, stats):
+        """
+            set up data
+            rename colums 
+
+        """
         self.all_figures = combined_financials.loc[combined_financials.index.intersection(self.figures)]
         self.all_stats = stats.loc[stats.index.intersection(self.stats)]
 
@@ -36,27 +39,34 @@ class MagicFormula:
         rename_stat_dict = {self.stats[i]: self.indx_s[i] for i in range(len(self.stats))}
 
         self.all_figures = self.all_figures.rename(index=rename_fig_dict)
-        self.all_stats = self.all_stats.rename(rename_stat_dict)
-
-        print(self.all_figures)
-        print(self.all_stats)
-        # self.__clean_data()
-        # self.__calc_relevant_metrics()
+        self.all_stats = self.all_stats.rename(rename_stat_dict) 
+        self.__clean_data()
+        self.__calc_relevant_metrics()
 
     def __clean_data(self):
-        all_stats_df = pd.DataFrame(self.all_stats,index=self.indx) 
-        all_stats_df = all_stats_df.replace({',': ''}, regex=True)
-        all_stats_df = all_stats_df.replace({'M': 'E+03'}, regex=True)
-        all_stats_df = all_stats_df.replace({'B': 'E+06'}, regex=True)
-        all_stats_df = all_stats_df.replace({'T': 'E+09'}, regex=True)
-        all_stats_df = all_stats_df.replace({'%': 'E-02'}, regex=True) 
-        all_stats_df = all_stats_df.apply(pd.to_numeric, errors='coerce')
-        all_stats_df.dropna(axis=1,inplace=True)
-        self.all_stats = all_stats_df        
-        self.tickers = all_stats_df.columns.tolist()
+        """
+            drop stocks with nan values so we only have stocks that we can use
+        """
+        
+        self.all_figures.dropna(axis=1,inplace=True)        
+        self.tickers =  set([company[0] for company in self.all_figures.columns.tolist()]) # make list unique
+        tickers = [(ticker, 'Value') for ticker in self.tickers] # self.all_stats is multiindex 
+        self.all_stats = self.all_stats[self.all_stats.columns.intersection(tickers)]  
+        # extract only the first column
+        df = pd.DataFrame()
+        for s in self.tickers:
+            temp = self.all_figures[s]
+            temp = temp[temp.columns[0]]            
+            temp = temp.append(self.all_stats[(s, 'Value')])
+            df[s] = temp
+        self.all_figures = df.apply(pd.to_numeric, errors='coerce')
 
+       
     def __calc_relevant_metrics(self):
-        transpose_df = self.all_stats.transpose()
+        """
+            calc needed metrics
+        """
+        transpose_df = self.all_figures.transpose()
         final_stats_df = pd.DataFrame()
         final_stats_df["EBIT"] = transpose_df["EBITDA"] - transpose_df["D&A"]
         final_stats_df["TEV"] =  transpose_df["MarketCap"].fillna(0) \
