@@ -11,9 +11,11 @@ import paper_pants.portfolio.portfolio as pt
 
 import pandas_datareader.data as pdr
 import paper_pants.data_collection.value_investing.magic_formula as mf
+import paper_pants.data_collection.value_investing.piotroski_f_score as pfscore
+
 
 pages = ['Balance Sheet', 'Income Statement', 'Cash Flow', 'Key Ratios']
-companies = ["APX.AX", "AAPL"]
+companies = ["APX.AX", "AAPL", "MSFT"]#, "AXP","BA","CAT","CVX","CSCO","DIS","DOW", "XOM", "HD","IBM","INTC","JNJ","KO","MCD","MMM","MRK", "NKE","PFE","PG","TRV","UTX","UNH","VZ","V","WMT","WBA"]
 startDate = datetime.combine(date.today(), time()) - timedelta(1095)
 endDate = datetime.combine(date.today(), time())
 
@@ -32,4 +34,6 @@ if __name__ == "__main__":
     # print(sc.financials)
     # print(sc.stats)
     magic = mf.MagicFormula(sc.financials, sc.stats)
-    # magic.print()
+    magic.print()
+    piotroskif = pfscore.PiotroskiFScore(sc.financials)
+    piotroskif.print()
