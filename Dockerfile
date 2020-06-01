@@ -14,5 +14,5 @@ WORKDIR /app
 ADD . /app
 
 # During debugging, this entry point will be overridden. For more information, refer to https://aka.ms/vscode-docker-python-debug
-CMD ["python", "paper_pants/experiments.py"]
+CMD ["python", "paper_pants/forex_exp.py"]
 #CMD ["/bin/bash"]
