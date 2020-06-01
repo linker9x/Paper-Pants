@@ -1,6 +1,6 @@
 from datetime import date, datetime, timedelta, time
 import paper_pants.data_collection.API.stock_api as sa
-import paper_pants.trading_strategies.strategies as st
+import paper_pants.trading_strategies.strategy.strategies as st
 
 class Portfolio(object):
     def __init__(self, tickers, strategy = None):

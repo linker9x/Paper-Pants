@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath(os.path.join('.')))
 
 import paper_pants.data_collection.API.stock_api as sa
 import paper_pants.data_collection.scraper.statement_scraper as scraper
-import paper_pants.trading_strategies.strategies as st
+import paper_pants.trading_strategies.strategy.strategies as st
 import paper_pants.portfolio.portfolio as pt
 
 import pandas_datareader.data as pdr
