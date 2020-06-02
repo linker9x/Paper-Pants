@@ -2,6 +2,7 @@ import paper_pants.trading_strategies.technical_indicators.ohlcv_ti as ti
 import paper_pants.data_collection.API.stock_api as sa
 from datetime import date, datetime, timedelta, time
 import pandas as pd
+import copy
 
 
 class Strategy:
@@ -18,11 +19,11 @@ class Strategy:
         self.tis = tis
         self.period = period
 
-        self.df_hist_data = None
+        self.df_data = None
 
         self.load_ohlcv_data()
-        print(self.df_hist_data)
-        # self.calculate_indicators()
+        self.calculate_indicators()
+        print(self.df_data)
 
     def __str__(self):
         return 'Portfolio: {}, Name: {}, Type: {}, Period: {}, TIs: {}'.format(self.portfolio,
@@ -33,33 +34,32 @@ class Strategy:
 
     def load_ohlcv_data(self):
         if self.type == 'FOREX':
-            self.df_hist_data = pd.DataFrame()
+            self.df_data = pd.DataFrame()
         else:
             self.type = 'STOCK'
 
             sA = sa.StockApi(self.portfolio)
             temp = sA.get_data_pd_yahoo(self.start_date, self.end_date)
-            self.df_hist_data = temp
+            self.df_data = temp
 
     def calculate_indicators(self):
-        hd_df = self.portfolio.historic_data
-        ti_df = None
+        df_indicators = None
 
-        for ticker in hd_df.stack(level=1).keys():
-            ticker_df = copy.deepcopy(hd_df[ticker])
-            for t_ind in _tis:
-                # print(ticker_df)
-                ticker_df = ticker_df.join(_tis[t_ind](ticker_df))
+        if self.tis:
+            for ticker in self.df_data.stack(level=1).keys():
+                df_ticker = copy.deepcopy(self.df_data[ticker])
+                for t_ind in self.tis:
+                    df_ticker = df_ticker.join(self.tis[t_ind](df_ticker))
 
-                temp_df = ticker_df[~ticker_df.index.duplicated(keep='first')]
-                temp_df = pd.concat([temp_df], keys=[ticker], axis=1)
+                    df_temp = df_ticker[~df_ticker.index.duplicated(keep='first')]
+                    df_temp = pd.concat([df_temp], keys=[ticker], axis=1)
 
-            if ti_df is not None:
-                ti_df = ti_df.join(temp_df)
-            else:
-                ti_df = temp_df
+                if df_indicators is not None:
+                    df_indicators = df_indicators.join(df_temp)
+                else:
+                    df_indicators = df_temp
 
-        self.df = ti_df
+            self.df_data = df_indicators
 
     def generate_signal(self):
         pass
