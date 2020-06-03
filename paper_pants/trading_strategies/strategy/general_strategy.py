@@ -1,6 +1,7 @@
 import paper_pants.trading_strategies.technical_indicators.ohlcv_ti as ti
 import paper_pants.data_collection.API.stock_api as sa
 from datetime import date, datetime, timedelta, time
+from dateutil.relativedelta import relativedelta
 import pandas as pd
 import copy
 
@@ -9,13 +10,18 @@ class Strategy:
     _tis = {'macd': ti.macd, 'atr': ti.atr, 'bollinger_band': ti.bollinger_band,
             'rsi': ti.rsi, 'adx': ti.adx, 'obv': ti.obv, 'slope': ti.slope, 'renko': ti.renko}
 
-    def __init__(self, portfolio, type, start_date, end_date, name, tis=_tis, period='daily'):
+    def __init__(self, portfolio, type, end_date, offset=0, tis=_tis, period='daily'):
         self.portfolio = portfolio
         self.type = type
-        self.start_date = datetime.strptime(start_date, '%Y-%m-%d')
-        self.end_date = datetime.strptime(end_date, '%Y-%m-%d')
+        self.offset = offset
 
-        self.name = name
+        if isinstance(end_date, datetime):
+            self.start_date = end_date + relativedelta(months=offset)
+            self.end_date = end_date
+        else:
+            self.start_date = datetime.strptime(end_date, '%Y-%m-%d') + relativedelta(months=offset)
+            self.end_date = datetime.strptime(end_date, '%Y-%m-%d')
+
         self.tis = tis
         self.period = period
 
@@ -26,11 +32,10 @@ class Strategy:
         print(self.df_data)
 
     def __str__(self):
-        return 'Portfolio: {}, Name: {}, Type: {}, Period: {}, TIs: {}'.format(self.portfolio,
-                                                                               self.name,
-                                                                               self.type,
-                                                                               self.period,
-                                                                               self.tis.keys())
+        return 'Portfolio: {}, Type: {}, Period: {}, TIs: {}'.format(self.portfolio,
+                                                                     self.type,
+                                                                     self.period,
+                                                                     self.tis.keys())
 
     def load_ohlcv_data(self):
         if self.type == 'FOREX':
