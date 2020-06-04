@@ -12,5 +12,5 @@ toDate = datetime.combine(date.today(), time())
 if __name__ == "__main__":
     pairs = ['EUR_USD', 'GBP_USD', 'USD_CHF', 'AUD_USD', 'USD_CAD']
     o = oa.OandaApi(pairs)
-    data = o.get_data(fromDate,toDate)
+    data = o.get_data(fromDate,toDate, 'S30')
     print(data)

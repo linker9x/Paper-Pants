@@ -51,10 +51,10 @@ class OandaApi(object):
             -------
             pandas.Dataframe()
         """
+        forex_data = None
         params = {"from": fromDate.timestamp(),
                   "to": toDate.timestamp(),
-                  "granularity":interval}
-        overall = {}
+                  "granularity":interval} 
         for currency_pair in self._currency_pairs:
             candles = instruments.InstrumentsCandles(instrument=currency_pair, params=params)
             self._client.request(candles)
@@ -63,6 +63,15 @@ class OandaApi(object):
             ohlc_df = ohlc.mid.dropna().apply(pd.Series)
             ohlc_df["volume"] = ohlc["volume"]
             ohlc_df.index = ohlc["time"]
+            ohlc_df.index.name = 'Date'
+            ohlc_df = ohlc_df[[ 'o', 'l' , 'h', 'c', 'volume']]
+            ohlc_df.columns = ['Open', 'Low', 'High', 'Close', 'Volume']
+            ohlc_df = pd.concat([ohlc_df], keys=[currency_pair], axis=1)
+            print(ohlc_df)
+
             ohlc_df = ohlc_df.apply(pd.to_numeric)
-            overall[currency_pair] = ohlc_df
-        return overall
+            if forex_data is not None:
+                forex_data = forex_data.join(ohlc_df, how='outer')
+            else:
+                forex_data = ohlc_df
+        return forex_data
