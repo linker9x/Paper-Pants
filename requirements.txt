@@ -17,3 +17,4 @@ wrapt
 yahoofinancials
 stockstats
 statsmodels
+oandapyV20
