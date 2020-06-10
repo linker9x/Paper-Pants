@@ -33,7 +33,7 @@ class Strategy:
     def load_ohlcv_data(self):
         if self.type == 'FOREX':
             oA = oa.OandaApi(self.portfolio)
-            temp = oA.get_data(self.start_date, self.end_date, 'S30')
+            temp = oA.get_data(self.start_date, self.end_date, 'M1')
             self.df_data = temp
         elif self.type == 'STOCK':
             sA = sa.StockApi(self.portfolio)

@@ -9,12 +9,9 @@ class ResistanceBreakout(Strategy):
 
 
     def generate_signal(self):
+        for ticker in self.df_data.stack(level=1).keys():
+            print(ticker)
 
-        # df = self.df
-        # self.name = 'resist_breakout'
-        # rb_df = None
-        #
-        # for ticker in df.stack(level=1).keys():
         #     ticker_df = copy.deepcopy(df[ticker])
         #
         #     ticker_df["roll_max_high"] = ticker_df["High"].rolling(20).max()

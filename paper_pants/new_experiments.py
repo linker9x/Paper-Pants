@@ -37,6 +37,7 @@ if __name__ == "__main__":
     print(pairs.keys())
 
     fx_end_dt = datetime.now()
-    fx_start_dt = fx_end_dt + relativedelta(minutes=-10)
+    fx_start_dt = fx_end_dt + relativedelta(minutes=-20)
     fx_strategy = ResistanceBreakout(pairs.keys(), 'FOREX', fx_start_dt, fx_end_dt)
+    fx_strategy.generate_signal()
     print(fx_strategy)
