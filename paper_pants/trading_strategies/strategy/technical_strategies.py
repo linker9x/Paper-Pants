@@ -3,9 +3,9 @@ import paper_pants.trading_strategies.technical_indicators.ohlcv_ti as ti
 
 
 class ResistanceBreakout(Strategy):
-    def __init__(self, portfolio, type, end_date):
+    def __init__(self, portfolio, type, start_date, end_date):
         tis = {'atr': ti.atr}
-        Strategy.__init__(self, portfolio, type, end_date, offset=-1, tis=tis)
+        Strategy.__init__(self, portfolio, type, start_date, end_date, tis=tis)
 
 
     def generate_signal(self):

@@ -1,5 +1,6 @@
 import paper_pants.trading_strategies.technical_indicators.ohlcv_ti as ti
 import paper_pants.data_collection.API.stock_api as sa
+import paper_pants.data_collection.API.oanda_api as oa
 from datetime import date, datetime, timedelta, time
 from dateutil.relativedelta import relativedelta
 import pandas as pd
@@ -10,21 +11,13 @@ class Strategy:
     _tis = {'macd': ti.macd, 'atr': ti.atr, 'bollinger_band': ti.bollinger_band,
             'rsi': ti.rsi, 'adx': ti.adx, 'obv': ti.obv, 'slope': ti.slope, 'renko': ti.renko}
 
-    def __init__(self, portfolio, type, end_date, offset=0, tis=_tis, period='daily'):
+    def __init__(self, portfolio, type, start_date, end_date, tis=_tis, period='daily'):
+        self.start_date = start_date
+        self.end_date = end_date
         self.portfolio = portfolio
         self.type = type
-        self.offset = offset
-
-        if isinstance(end_date, datetime):
-            self.start_date = end_date + relativedelta(months=offset)
-            self.end_date = end_date
-        else:
-            self.start_date = datetime.strptime(end_date, '%Y-%m-%d') + relativedelta(months=offset)
-            self.end_date = datetime.strptime(end_date, '%Y-%m-%d')
-
         self.tis = tis
         self.period = period
-
         self.df_data = None
 
         self.load_ohlcv_data()
@@ -39,13 +32,15 @@ class Strategy:
 
     def load_ohlcv_data(self):
         if self.type == 'FOREX':
-            self.df_data = pd.DataFrame()
-        else:
-            self.type = 'STOCK'
-
+            oA = oa.OandaApi(self.portfolio)
+            temp = oA.get_data(self.start_date, self.end_date, 'S30')
+            self.df_data = temp
+        elif self.type == 'STOCK':
             sA = sa.StockApi(self.portfolio)
             temp = sA.get_data_pd_yahoo(self.start_date, self.end_date)
             self.df_data = temp
+        else:
+            raise Exception('Not a valid type.')
 
     def calculate_indicators(self):
         df_indicators = None
