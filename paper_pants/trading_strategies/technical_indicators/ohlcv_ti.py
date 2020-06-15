@@ -306,6 +306,37 @@ def slope(dataframe, col_name = 'Close', period=5):
     return df[['slope_angle']]
 
 
+def stochastic(dataframe, a=14, b=3, c=3):
+    df = dataframe.copy()
+
+    df['k'] = ((df['Close'] - df['Low'].rolling(a).min()) /
+               (df['High'].rolling(a).max() - df['Low'].rolling(a).min())) * 100
+    df['K'] = df['k'].rolling(b).mean()
+    df['D'] = df['K'].rolling(c).mean()
+
+    return df[['K', 'D']]
+
+
+def sma(dataframe, a=25, b=50):
+    df = dataframe.copy()
+
+    df['sma_fast'] = df['Close'].rolling(a).mean()
+    df['sma_slow'] = df['Close'].rolling(b).mean()
+
+    df['upward_sma_dir'] = np.where((df['sma_fast'].shift(1) > df['sma_slow'].shift(1)) &
+                                    (df['sma_fast'].shift(2) < df['sma_slow'].shift(2)), True,
+                                    np.where((df['sma_fast'].shift(1) < df['sma_slow'].shift(1)) &
+                                    (df['sma_fast'].shift(2) > df['sma_slow'].shift(2)), False,
+                                             None))
+
+    df['dnward_sma_dir'] = np.where((df['sma_fast'].shift(1) > df['sma_slow'].shift(1)) &
+                                    (df['sma_fast'].shift(2) < df['sma_slow'].shift(2)), False,
+                                    np.where((df['sma_fast'].shift(1) < df['sma_slow'].shift(1)) &
+                                             (df['sma_fast'].shift(2) > df['sma_slow'].shift(2)), True,
+                                             None))
+    return df[['sma_fast', 'sma_slow', 'upward_sma_dir', 'dnward_sma_dir']]
+
+
 def renko(dataframe):
     """atr
     A Renko chart is built using price movement without standardized time intervals. A new brick is created when the

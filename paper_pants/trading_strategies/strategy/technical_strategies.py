@@ -179,10 +179,59 @@ class RenkoMACD(Strategy):
             self.portfolio.positions[ticker]['Size'] = next_size
 
 
-# class SMACrossover(Strategy):
-#     def __init__(self, portfolio, type, start_date, end_date):
-#         tis = {}
-#         Strategy.__init__(self, portfolio, type, start_date, end_date, 'SMACrossover', tis=tis)
-#
-#     def generate_signal(self):
-#         pass
+class SMACrossover(Strategy):
+    def __init__(self, portfolio, type, start_date, end_date):
+        tis = {'sma': ti.sma, 'stochastic': ti.stochastic}
+        Strategy.__init__(self, portfolio, type, start_date, end_date, tis=tis)
+
+    def generate_signals(self):
+        for ticker in self.df_data.stack(level=1).keys():
+            ticker_df = copy.deepcopy(self.df_data[ticker])
+            print(ticker_df)
+
+            cur_pos = self.portfolio.positions[ticker]['Position']
+            cur_size = self.portfolio.positions[ticker]['Size']
+
+            print(cur_pos)
+            print(cur_size)
+
+            thrd_bottom_row = ticker_df.iloc[-3]
+            sec_bottom_row = ticker_df.iloc[-2]
+            bottom_row = ticker_df.iloc[-1]
+
+            if cur_pos == '':
+                if bottom_row['upward_sma_dir'] == True \
+                        and min(sec_bottom_row['K'], sec_bottom_row['D']) > 25 \
+                        and max(thrd_bottom_row['K'], thrd_bottom_row['D']) < 25:
+                    next_pos = 'Buy/Long'
+                # elif bottom_row['renko_bar_num'] <= -2 and bottom_row['macd'] < bottom_row['macd_signal'] \
+                #         and bottom_row['macd_slope'] < bottom_row['macd_sig_slope']:
+                #     next_pos = 'Sell/Short'
+                else:
+                    next_pos = cur_pos
+
+            elif cur_pos == 'Buy/Long':
+                if bottom_row['dnward_sma_dir'] == True \
+                        and min(sec_bottom_row['K'], sec_bottom_row['D']) > 75 \
+                        and max(thrd_bottom_row['K'], thrd_bottom_row['D']) < 75:
+                    next_pos = ''
+                # elif bottom_row['renko_bar_num'] <= -2 and bottom_row['macd'] < bottom_row['macd_signal'] \
+                #         and bottom_row['macd_slope'] < bottom_row['macd_sig_slope']:
+                #     next_pos = 'Sell/Short'
+                else:
+                    next_pos = cur_pos
+
+            # elif cur_pos == 'Sell/Short':
+            #     if bottom_row['renko_bar_num'] >= 2 and bottom_row['macd'] > bottom_row['macd_signal'] and \
+            #             bottom_row['macd_slope'] > bottom_row['macd_sig_slope']:
+            #         next_pos = 'Buy/Long'
+            #     elif bottom_row['macd'] > bottom_row['macd_signal'] and bottom_row['macd_slope'] > \
+            #             bottom_row['macd_sig_slope']:
+            #         next_pos = ''
+            #     else:
+            #         next_pos = cur_pos
+
+            next_size = cur_size  # figure this out and actually buy something?
+            self.portfolio.positions[ticker]['Position'] = next_pos
+            self.portfolio.positions[ticker]['Size'] = next_size
+

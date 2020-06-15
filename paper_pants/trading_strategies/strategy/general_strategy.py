@@ -9,7 +9,8 @@ import copy
 
 class Strategy:
     _tis = {'macd': ti.macd, 'atr': ti.atr, 'bollinger_band': ti.bollinger_band,
-            'rsi': ti.rsi, 'adx': ti.adx, 'obv': ti.obv, 'slope': ti.slope, 'renko': ti.renko}
+            'sma': ti.sma, 'stochastic': ti.stochastic, 'rsi': ti.rsi, 'adx': ti.adx,
+            'obv': ti.obv, 'slope': ti.slope, 'renko': ti.renko}
 
     def __init__(self, portfolio, type, start_date, end_date, tis=_tis, period='daily'):
         self.start_date = start_date
@@ -23,6 +24,7 @@ class Strategy:
         self.__load_ohlcv_data()
         self.__calculate_indicators()
         print(self.df_data)
+        # self.df_data.to_csv('test.csv', index=False)
 
     def __str__(self):
         return 'Portfolio: {}, Type: {}, Period: {}, TIs: {}'.format(self.portfolio,
