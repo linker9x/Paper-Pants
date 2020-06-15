@@ -20,8 +20,8 @@ class Strategy:
         self.period = period
         self.df_data = None
 
-        self.load_ohlcv_data()
-        self.calculate_indicators()
+        self.__load_ohlcv_data()
+        self.__calculate_indicators()
         print(self.df_data)
 
     def __str__(self):
@@ -30,24 +30,25 @@ class Strategy:
                                                                      self.period,
                                                                      self.tis.keys())
 
-    def load_ohlcv_data(self):
+    def __load_ohlcv_data(self):
         if self.type == 'FOREX':
-            oA = oa.OandaApi(self.portfolio)
+            oA = oa.OandaApi(self.portfolio.tickers)
             temp = oA.get_data(self.start_date, self.end_date, 'M1')
             self.df_data = temp
         elif self.type == 'STOCK':
-            sA = sa.StockApi(self.portfolio)
+            sA = sa.StockApi(self.portfolio.tickers)
             temp = sA.get_data_pd_yahoo(self.start_date, self.end_date)
             self.df_data = temp
         else:
             raise Exception('Not a valid type.')
 
-    def calculate_indicators(self):
+    def __calculate_indicators(self):
         df_indicators = None
 
         if self.tis:
             for ticker in self.df_data.stack(level=1).keys():
                 df_ticker = copy.deepcopy(self.df_data[ticker])
+                df_ticker.ffill(axis=0, inplace=True)
                 for t_ind in self.tis:
                     df_ticker = df_ticker.join(self.tis[t_ind](df_ticker))
 
@@ -61,8 +62,17 @@ class Strategy:
 
             self.df_data = df_indicators
 
-    def generate_signal(self):
+    def generate_signals(self):
         pass
+
+    def long_something(self):
+        return 'LONG'
+
+    def short_something(self):
+        return 'SHORT'
+
+    def exit_something(self):
+        return 'EXIT'
 
     def backtest_strategy(self, start_date, end_date):
         pass

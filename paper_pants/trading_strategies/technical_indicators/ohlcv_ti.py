@@ -354,7 +354,7 @@ def col_rename(df):
     Returns:
         pd.Dataframe: Dataframe with lowercase headers.
     """
-    df.drop('Close', axis=1, inplace=True)
+    # df.drop('Close', axis=1, inplace=True)
     df.rename(columns={"Date": "date", "High": "high", "Low": "low", "Open": "open", "Close": "close",
                        "Volume": "volume"}, inplace=True)
     return df

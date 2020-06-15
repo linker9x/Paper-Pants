@@ -67,7 +67,7 @@ class OandaApi(object):
             ohlc_df = ohlc_df[[ 'o', 'l' , 'h', 'c', 'volume']]
             ohlc_df.columns = ['Open', 'Low', 'High', 'Close', 'Volume']
             ohlc_df = pd.concat([ohlc_df], keys=[currency_pair], axis=1)
-            print(ohlc_df)
+            # print(ohlc_df)
 
             ohlc_df = ohlc_df.apply(pd.to_numeric)
             if forex_data is not None:
